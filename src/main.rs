@@ -3,15 +3,20 @@ mod bots;
 mod global_styles;
 mod header;
 
+use directories::BaseDirs;
 use iced::{
     widget::{column, container, Image},
     window, Application, Command, Font, Length, Settings, Size,
 };
 use native_dialog::FileDialog;
+use once_cell::sync::Lazy;
 use std::{borrow::Cow, path::PathBuf};
 
 const EXO_2_FONT: Font = Font::with_name("Exo 2");
 const EXO_2_FONT_BYTES: &[u8] = include_bytes!("../fonts/exo-2.ttf");
+
+// To minimize sys calls, we store these directories in this lazy static
+static BASE_DIRS: Lazy<BaseDirs> = Lazy::new(|| BaseDirs::new().unwrap());
 
 fn main() -> iced::Result {
     MainApp::run(Settings {
@@ -93,7 +98,7 @@ impl Application for MainApp {
 
 async fn prompt_load_folder() -> Option<PathBuf> {
     FileDialog::new()
-        .set_location("~/")
+        .set_location(BASE_DIRS.home_dir())
         .set_title("Select folder of bots to load")
         .show_open_single_dir()
         .inspect_err(|err| println!("Error opening native dialog: {err}"))
@@ -103,7 +108,7 @@ async fn prompt_load_folder() -> Option<PathBuf> {
 
 async fn prompt_load_file() -> Option<PathBuf> {
     FileDialog::new()
-        .set_location("~/")
+        .set_location(BASE_DIRS.home_dir())
         .add_filter("Bot config or custom map", &["toml", "upk"])
         .set_title("Select bot config or map to load")
         .show_open_single_file()
