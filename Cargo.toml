@@ -1,0 +1,20 @@
+[package]
+name = "rlbot_gui_rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lints.clippy]
+all = "warn"
+
+[dependencies]
+iced = { version = "0.12.1", features = ["image", "advanced", "debug"] }
+iced_aw = "0.8.0"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = true
+strip = true
