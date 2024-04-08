@@ -1,10 +1,10 @@
-use crate::{global_styles::CustomHoverTextButton, Message};
+use crate::{global_styles::CustomHoverTextButton, Message, EXO_2_FONT};
 use iced::{
     alignment::{Horizontal, Vertical},
-    font::{Family, Weight},
+    font::Weight,
     theme,
     widget::{button, column, container, image, row, text, Space},
-    Background, Border, Color, Element, Font, Length, Theme,
+    Background, Border, Color, Element, Length, Theme,
 };
 use iced_aw::{
     menu,
@@ -32,10 +32,10 @@ pub fn content<'a>() -> Element<'a, Message> {
         image("assets/imgs/rlbot_logo.png").width(48),
         text(" RLBot")
             .style(Color::WHITE)
-            .font(Font {
-                family: Family::Name("exo-2"),
-                weight: Weight::Bold,
-                ..Default::default()
+            .font({
+                let mut font = EXO_2_FONT;
+                font.weight = Weight::Bold;
+                font
             })
             .size(24),
         Space::with_width(Length::Fill),

@@ -1,7 +1,8 @@
-use crate::{global_styles::CustomHoverTextButton, Message};
+use crate::{global_styles::CustomHoverTextButton, Message, EXO_2_FONT};
 use iced::{
     alignment::{Horizontal, Vertical},
     border::Radius,
+    font::Weight,
     theme,
     widget::{button, column, container, row, scrollable, text, Space},
     Alignment, Background, Border, Color, Length,
@@ -40,7 +41,11 @@ pub fn content() -> iced::Element<'static, Message> {
     container(
         container(column![
             row![
-                text("Bots").size(24).vertical_alignment(Vertical::Center),
+                text("Bots").size(24).vertical_alignment(Vertical::Center).font({
+                    let mut font = EXO_2_FONT;
+                    font.weight = Weight::Bold;
+                    font
+                }),
                 Space::with_width(20),
                 menu_bar!((
                     button(

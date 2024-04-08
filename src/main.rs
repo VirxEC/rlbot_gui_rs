@@ -5,10 +5,12 @@ mod header;
 
 use iced::{
     widget::{column, container, Image},
-    window, Application, Command, Length, Settings, Size,
+    window, Application, Command, Font, Length, Settings, Size,
 };
-use std::borrow::Cow;
+use native_dialog::FileDialog;
+use std::{borrow::Cow, path::PathBuf};
 
+const EXO_2_FONT: Font = Font::with_name("Exo 2");
 const EXO_2_FONT_BYTES: &[u8] = include_bytes!("../fonts/exo-2.ttf");
 
 fn main() -> iced::Result {
@@ -35,6 +37,8 @@ enum Message {
     RepairBotPack,
     PromptLoadFolder,
     PromptLoadFile,
+    LoadFolder(Option<PathBuf>),
+    LoadFile(Option<PathBuf>),
 }
 
 struct MainApp;
@@ -54,9 +58,19 @@ impl Application for MainApp {
     }
 
     fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
-        dbg!(message);
-
-        Command::none()
+        match dbg!(message) {
+            Message::RepairBotPack => Command::none(),
+            Message::PromptLoadFolder => Command::perform(prompt_load_folder(), Message::LoadFolder),
+            Message::PromptLoadFile => Command::perform(prompt_load_file(), Message::LoadFile),
+            Message::LoadFolder(path) => {
+                dbg!(path);
+                Command::none()
+            }
+            Message::LoadFile(path) => {
+                dbg!(path);
+                Command::none()
+            }
+        }
     }
 
     fn theme(&self) -> Self::Theme {
@@ -75,4 +89,25 @@ impl Application for MainApp {
 
         background::Modal::new(background, content).into()
     }
+}
+
+async fn prompt_load_folder() -> Option<PathBuf> {
+    FileDialog::new()
+        .set_location("~/")
+        .set_title("Select folder of bots to load")
+        .show_open_single_dir()
+        .inspect_err(|err| println!("Error opening native dialog: {err}"))
+        .ok()
+        .flatten()
+}
+
+async fn prompt_load_file() -> Option<PathBuf> {
+    FileDialog::new()
+        .set_location("~/")
+        .add_filter("Bot config or custom map", &["toml", "upk"])
+        .set_title("Select bot config or map to load")
+        .show_open_single_file()
+        .inspect_err(|err| println!("Error opening native dialog: {err}"))
+        .ok()
+        .flatten()
 }

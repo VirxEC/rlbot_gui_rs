@@ -9,8 +9,9 @@ edition = "2021"
 all = "warn"
 
 [dependencies]
-iced = { version = "0.12.1", features = ["image", "advanced", "debug"] }
+iced = { version = "0.12.1", features = ["image", "advanced", "debug", "tokio"] }
 iced_aw = "0.8.0"
+native-dialog = { version = "0.7.0", features = ["windows_dpi_awareness", "windows_visual_styles"] }
 
 [profile.dev.package."*"]
 opt-level = 3
