@@ -10,8 +10,8 @@ use iced::{
 };
 use native_dialog::FileDialog;
 use std::{borrow::Cow, path::PathBuf};
-use tokio::fs;
-use toml_edit::{Array, ArrayOfTables, DocumentMut, Item, Table, Value};
+use tokio::{fs, task::spawn_blocking};
+use toml_edit::{Array, DocumentMut, Item, Value};
 
 const EXO_2_FONT: Font = Font::with_name("Exo 2");
 const EXO_2_FONT_BYTES: &[u8] = include_bytes!("../fonts/exo-2.ttf");
@@ -45,6 +45,7 @@ enum Message {
     LoadFolder(Option<PathBuf>),
     LoadFile(Option<PathBuf>),
     FolderLoaded(()),
+    ManageBotSettings,
 }
 
 struct MainApp {
@@ -58,13 +59,12 @@ impl MainApp {
     fn get_or_insert_array(&mut self, key: &str) -> &mut Array {
         let item = self.config.entry(key).or_insert(Item::None);
 
-        match item {
-            Item::Value(Value::Array(array)) => array,
-            _ => {
-                *item = Item::Value(Value::Array(Array::new()));
-                item.as_value_mut().and_then(Value::as_array_mut).unwrap()
-            }
+        if let Item::Value(Value::Array(array)) = item {
+            return array;
         }
+
+        *item = Item::Value(Value::Array(Array::new()));
+        item.as_value_mut().and_then(Value::as_array_mut).unwrap()
     }
 }
 
@@ -138,6 +138,7 @@ impl Application for MainApp {
             }
             Message::FolderLoaded(()) => Command::none(),
             Message::ConfigSaved(()) => Command::none(),
+            Message::ManageBotSettings => Command::none(),
         }
     }
 
@@ -160,24 +161,34 @@ impl Application for MainApp {
 }
 
 async fn prompt_load_folder(home_dir: PathBuf) -> Option<PathBuf> {
-    FileDialog::new()
-        .set_location(&home_dir)
-        .set_title("Select folder of bots to load")
-        .show_open_single_dir()
-        .inspect_err(|err| println!("Error opening native dialog: {err}"))
-        .ok()
-        .flatten()
+    spawn_blocking(move || {
+        FileDialog::new()
+            .set_location(&home_dir)
+            .set_title("Select folder of bots to load")
+            .show_open_single_dir()
+            .inspect_err(|err| println!("Error opening native dialog: {err}"))
+            .ok()
+            .flatten()
+    })
+    .await
+    .ok()
+    .flatten()
 }
 
 async fn prompt_load_file(home_dir: PathBuf) -> Option<PathBuf> {
-    FileDialog::new()
-        .set_location(&home_dir)
-        .add_filter("Bot config or custom map", &["toml", "upk"])
-        .set_title("Select bot config or map to load")
-        .show_open_single_file()
-        .inspect_err(|err| println!("Error opening native dialog: {err}"))
-        .ok()
-        .flatten()
+    spawn_blocking(move || {
+        FileDialog::new()
+            .set_location(&home_dir)
+            .add_filter("Bot config or custom map", &["toml", "upk"])
+            .set_title("Select bot config or map to load")
+            .show_open_single_file()
+            .inspect_err(|err| println!("Error opening native dialog: {err}"))
+            .ok()
+            .flatten()
+    })
+    .await
+    .ok()
+    .flatten()
 }
 
 async fn load_folder(path: PathBuf) {
@@ -185,16 +196,15 @@ async fn load_folder(path: PathBuf) {
 }
 
 async fn load_config(parent: PathBuf, path: PathBuf) -> DocumentMut {
-    match fs::read_to_string(&path).await {
-        Ok(content) => content.parse().unwrap_or_default(),
-        Err(_) => {
-            let config = DocumentMut::new();
+    if let Ok(content) = fs::read_to_string(&path).await {
+        content.parse().unwrap_or_default()
+    } else {
+        let config = DocumentMut::new();
 
-            // the config doesn't exist, so we'll create it
-            save_config(parent, path, &config).await;
+        // the config doesn't exist, so we'll create it
+        save_config(parent, path, &config).await;
 
-            config
-        }
+        config
     }
 }
 

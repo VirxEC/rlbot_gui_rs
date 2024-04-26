@@ -1,4 +1,4 @@
-use iced::{widget::button, Background, Border, Theme};
+use iced::{widget::button, Border, Theme};
 
 pub struct CustomHoverTextButton;
 
@@ -19,7 +19,7 @@ impl button::StyleSheet for CustomHoverTextButton {
         let palette = style.extended_palette();
 
         button::Appearance {
-            background: Some(Background::from(palette.secondary.base.color)),
+            background: Some(palette.secondary.base.color.into()),
             ..self.active(style)
         }
     }

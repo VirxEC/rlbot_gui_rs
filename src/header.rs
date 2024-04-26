@@ -4,7 +4,7 @@ use iced::{
     font::Weight,
     theme,
     widget::{button, column, container, image, row, text, Space},
-    Background, Border, Color, Element, Length, Theme,
+    Border, Color, Element, Length, Theme,
 };
 use iced_aw::{
     menu,
@@ -53,14 +53,14 @@ pub fn content<'a>() -> Element<'a, Message> {
             more_menu
         ))
         .style(|theme: &Theme| menu::Appearance {
-            bar_background: Background::Color(Color::BLACK),
-            menu_background: Background::Color(Color::WHITE),
+            bar_background: Color::BLACK.into(),
+            menu_background: Color::WHITE.into(),
             ..theme.appearance(&MenuBarStyle::Default)
         })
     ]
     .align_items(Vertical::Center.into())]])
     .style(container::Appearance {
-        background: Some(iced::Background::Color(Color::BLACK)),
+        background: Some(Color::BLACK.into()),
         ..Default::default()
     })
     .width(Length::Fill)
@@ -89,7 +89,7 @@ impl button::StyleSheet for DarkSecondaryButton {
         let palette = Theme::Dark.extended_palette();
 
         button::Appearance {
-            background: Some(Background::from(palette.background.strong.color)),
+            background: Some(palette.primary.base.color.into()),
             ..self.active(&Theme::Dark)
         }
     }

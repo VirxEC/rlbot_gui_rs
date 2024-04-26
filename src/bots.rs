@@ -67,7 +67,22 @@ pub fn content() -> iced::Element<'static, Message> {
                     .style(theme::Button::Secondary)
                     .padding(10),
                     add_menu
-                ))
+                )),
+                Space::with_width(20),
+                button(
+                    row![
+                        text(BootstrapIcon::Gear)
+                            .size(20)
+                            .font(BOOTSTRAP_FONT)
+                            .style(Color::BLACK)
+                            .height(Length::Shrink),
+                        text(" Manage Bot Settings").size(20).style(Color::BLACK),
+                    ]
+                    .align_items(Alignment::Center)
+                )
+                .on_press(Message::ManageBotSettings)
+                .style(theme::Button::Secondary)
+                .padding(10)
             ]
             .padding(10)
             .align_items(Alignment::Center),
